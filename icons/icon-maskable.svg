@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <clipPath id="inner"><rect x="84" y="84" width="344" height="344" rx="6"/></clipPath>
+  </defs>
+  <rect width="512" height="512" fill="#F2F4F9"/>
+  <!-- tile shrunk to fit the maskable safe zone (inner 80% circle) -->
+  <g transform="translate(256 256) scale(0.7) translate(-256 -256)">
+    <rect x="56" y="56" width="400" height="400" rx="18" fill="#FBFCFF" stroke="#2346A6" stroke-width="14"/>
+    <rect x="84" y="84" width="344" height="344" rx="6" fill="none" stroke="#2346A6" stroke-opacity=".45" stroke-width="4"/>
+    <g clip-path="url(#inner)" fill="#2346A6">
+      <circle cx="84" cy="84" r="44"/><circle cx="428" cy="84" r="44"/>
+      <circle cx="84" cy="428" r="44"/><circle cx="428" cy="428" r="44"/>
+      <g fill="none" stroke="#2346A6" stroke-opacity=".55" stroke-width="6">
+        <circle cx="84" cy="84" r="68"/><circle cx="428" cy="84" r="68"/>
+        <circle cx="84" cy="428" r="68"/><circle cx="428" cy="428" r="68"/>
+      </g>
+    </g>
+    <text x="256" y="336" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="236" fill="#13203F">W</text>
+  </g>
+</svg>
