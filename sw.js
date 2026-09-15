@@ -1,6 +1,6 @@
 // Woordjes offline support.
 // Bump VERSION whenever you change any file, so phones pick up the new copy.
-const VERSION = 'woordjes-v3';
+const VERSION = 'woordjes-v4';
 const CORE = [
   './',
   './index.html',
