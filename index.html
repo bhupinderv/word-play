@@ -183,6 +183,43 @@ td.you.skip{text-decoration:none; color:var(--muted); font-style:italic}
 .clean{margin:0; color:var(--muted)}
 .actions{display:flex; flex-wrap:wrap; gap:10px}
 
+/* live play with friends */
+.live{display:grid; gap:24px; padding-block:32px 0; max-width:720px; margin-inline:auto}
+.live-view{display:grid; gap:22px}
+.live-head{display:grid; gap:8px}
+.live-head h1{font-family:var(--display); font-weight:400; font-size:clamp(2rem, 4.6vw, 2.8rem); line-height:1.05; letter-spacing:-.015em; margin:0; text-wrap:balance}
+.live-head p{margin:0; color:var(--muted); max-width:56ch}
+.live-head .label{margin:0}
+.field{display:grid; gap:0; max-width:360px}
+.field input, .code-row input{width:100%; min-width:0; padding:12px 14px; border:1.5px solid var(--line); border-radius:8px; background:var(--surface); font-size:1.05rem}
+.field input:focus, .code-row input:focus{outline:none; border-color:var(--cobalt); box-shadow:0 0 0 3px var(--cobalt-soft)}
+.join-grid{display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px}
+.join-card{display:grid; gap:12px; align-content:start; padding:18px; border:1.5px solid var(--line); border-radius:8px; background:var(--surface)}
+.join-card h2{margin:0; font-size:1.05rem; font-weight:600}
+.join-card p{margin:0; font-size:.9rem; color:var(--muted)}
+.join-card .btn{justify-self:start}
+.code-row{display:flex; gap:8px}
+.code-row input{font-family:var(--mono); text-transform:uppercase; letter-spacing:.08em}
+.err{margin:0; min-height:1.5em; color:var(--bad); font-size:.92rem}
+.room-code{display:flex; flex-wrap:wrap; align-items:center; gap:12px 18px}
+.room-code .code{font-family:var(--display); font-size:clamp(2.4rem, 7vw, 3.4rem); line-height:1; letter-spacing:.02em; color:var(--cobalt)}
+.seats{display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px}
+.seat{display:grid; gap:6px; align-content:start; min-height:96px; padding:14px; border:1.5px solid var(--line); border-radius:8px; background:var(--surface)}
+.seat.empty{border-style:dashed; background:transparent; color:var(--muted); font-size:.88rem}
+.seat .nm{font-weight:600; overflow-wrap:anywhere}
+.seat .tags{display:flex; flex-wrap:wrap; gap:4px}
+.tag{font-family:var(--mono); font-size:.64rem; letter-spacing:.08em; text-transform:uppercase; padding:2px 6px; border-radius:3px; background:var(--sunk); color:var(--muted)}
+.tag.host{background:var(--cobalt); color:var(--cobalt-ink)}
+.dot{display:inline-flex; align-items:center; gap:6px; font-size:.8rem; color:var(--muted)}
+.dot::before{content:""; width:8px; height:8px; border-radius:50%; background:var(--good)}
+.dot.off::before{background:var(--line)}
+.live-settings{display:grid; gap:20px}
+.opt input:disabled + .pill, .opt input:disabled + .chip{cursor:default}
+.live-bar{display:flex; flex-wrap:wrap; align-items:center; gap:12px 18px; padding-top:20px; border-top:1px solid var(--line)}
+.live-bar .quiet{margin-left:auto}
+.conn{font-family:var(--mono); font-size:.8rem; color:var(--orange)}
+.toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:10; max-width:calc(100% - 32px); padding:10px 16px; border-radius:8px; background:var(--ink); color:var(--ground); font-size:.92rem; box-shadow:0 12px 30px -12px var(--shadow)}
+
 @media (max-width:820px){
   .setup{grid-template-columns:1fr; gap:32px; padding-block:28px 0}
   .intro{justify-items:stretch}
@@ -199,6 +236,9 @@ td.you.skip{text-decoration:none; color:var(--muted); font-style:italic}
   .stat:nth-child(2){border-left:0}
   .stat:not(:first-child){border-top:1px solid var(--line)}
   .legend-pts{display:none}
+  .join-grid{grid-template-columns:1fr}
+  .seats{grid-template-columns:repeat(2, minmax(0, 1fr))}
+  .live-bar .quiet{margin-left:0}
 }
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none !important; transition:none !important}
@@ -252,6 +292,7 @@ td.you.skip{text-decoration:none; color:var(--muted); font-style:italic}
 
       <div class="go">
         <button type="button" class="btn" id="startBtn">Start game</button>
+        <button type="button" class="btn ghost" id="friendsBtn">Play with friends</button>
         <p class="meta" id="setupMeta"></p>
       </div>
     </section>
@@ -302,6 +343,59 @@ td.you.skip{text-decoration:none; color:var(--muted); font-style:italic}
       <button type="button" class="btn" id="againBtn">Play again</button>
       <button type="button" class="btn ghost" id="settingsBtn">Change settings</button>
     </div>
+  </main>
+
+  <!-- LIVE: play with friends -->
+  <main id="live" class="live" hidden>
+    <section id="liveJoin" class="live-view">
+      <div class="live-head">
+        <h1>Samen spelen</h1>
+        <p>Play live with 2–4 friends. Everyone gets the same word at the same moment, and the faster you answer correctly, the more you score.</p>
+      </div>
+      <div class="field">
+        <label class="label" for="liveName">Your name</label>
+        <input id="liveName" type="text" maxlength="20" autocomplete="nickname" placeholder="e.g. Anna">
+      </div>
+      <div class="join-grid">
+        <div class="join-card">
+          <h2>Start a new room</h2>
+          <p>You’ll be the host and get a code to share.</p>
+          <button type="button" class="btn" id="createBtn">Create a room</button>
+        </div>
+        <div class="join-card">
+          <h2>Join a friend</h2>
+          <p>Enter the room code they sent you.</p>
+          <div class="code-row">
+            <input id="liveCode" type="text" maxlength="8" placeholder="KAAS-42" aria-label="Room code" autocapitalize="characters" autocomplete="off" spellcheck="false">
+            <button type="button" class="btn" id="joinBtn">Join</button>
+          </div>
+        </div>
+      </div>
+      <p class="err" id="joinErr" role="alert"></p>
+      <div><button type="button" class="linkbtn" id="liveBack">← Back to solo play</button></div>
+    </section>
+
+    <section id="liveLobby" class="live-view" hidden>
+      <div class="live-head">
+        <span class="label">Waiting room</span>
+        <div class="room-code">
+          <span class="code" id="roomCode"></span>
+          <button type="button" class="btn ghost" id="shareBtn">Share invite link</button>
+        </div>
+        <p id="lobbyNote"></p>
+      </div>
+      <div class="seats" id="seats"></div>
+      <div class="live-settings">
+        <fieldset><legend class="label">Match length</legend><div class="seg" id="liveWords"></div></fieldset>
+        <fieldset><legend class="label">Topics</legend><div class="chips" id="liveTopics"></div></fieldset>
+      </div>
+      <div class="live-bar">
+        <button type="button" class="btn" id="liveStart" disabled>Start match</button>
+        <p class="meta" id="startNote"></p>
+        <span class="conn" id="connNote" hidden>Reconnecting…</span>
+        <button type="button" class="btn quiet" id="leaveBtn">Leave room</button>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -629,7 +723,7 @@ const fmtTime = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return Math
 const fmtScore = n => n < 0 ? '−' + Math.abs(n) : String(n);
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 function fitWord(el, text){ el.style.fontSize = `clamp(1.4rem, ${Math.min(17, 118 / Math.max(text.length, 4))}cqi, 4rem)`; }
-function show(id){ ['setup','play','results'].forEach(s => $('#' + s).hidden = s !== id); window.scrollTo(0, 0); }
+function show(id){ ['setup','play','results','live'].forEach(s => $('#' + s).hidden = s !== id); window.scrollTo(0, 0); }
 
 /* ---------- Settings ---------- */
 const OPTS = {
@@ -847,7 +941,11 @@ function endGame(reason){
 $('#startBtn').addEventListener('click', startGame);
 $('#againBtn').addEventListener('click', startGame);
 $('#settingsBtn').addEventListener('click', () => show('setup'));
+
+// Shared with live.js (play with friends)
+window.Woordjes = { ENTRIES, CATS, CAT_BY_ID, grade, fitWord, esc, shuffle, show, store };
 </script>
+<script type="module" src="live.js"></script>
 
 <script>
 if ('serviceWorker' in navigator) {
