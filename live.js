@@ -17,12 +17,16 @@ let room = null; // { code, data, unsubs, hostTimer }
 /* ---------- Firebase connection (loaded only when someone plays live) ---------- */
 async function connect(){
   if (fb) return fb;
-  const [appMod, authMod, dbMod, cfg] = await Promise.all([
-    import(SDK + 'firebase-app.js'),
-    import(SDK + 'firebase-auth.js'),
-    import(SDK + 'firebase-database.js'),
-    import('./firebase-config.js')
-  ]);
+  let cfg, appMod, authMod, dbMod;
+  try { cfg = await import('./firebase-config.js'); }
+  catch (e) { throw Object.assign(new Error('missing-config'), { cause: e }); }
+  try {
+    [appMod, authMod, dbMod] = await Promise.all([
+      import(SDK + 'firebase-app.js'),
+      import(SDK + 'firebase-auth.js'),
+      import(SDK + 'firebase-database.js')
+    ]);
+  } catch (e) { throw Object.assign(new Error('sdk-failed'), { cause: e }); }
   const app = appMod.initializeApp(cfg.firebaseConfig);
   // Per-tab identity: a reload keeps you in your room, and two tabs count as two players.
   const auth = authMod.initializeAuth(app, { persistence: authMod.browserSessionPersistence });
@@ -78,15 +82,22 @@ const inviteUrl = code => location.origin + location.pathname + '?room=' + code;
 function connectError(e){
   console.error(e);
   const code = String((e && e.code) || '');
-  let msg = 'Couldn’t reach the live server. Try again in a moment.';
-  if (code === 'auth/operation-not-allowed' || code === 'auth/admin-restricted-operation')
-    msg = 'Live play isn’t switched on yet: enable Anonymous sign-in in Firebase (Authentication → Sign-in method).';
-  else if (code === 'auth/network-request-failed' || !navigator.onLine || e instanceof TypeError)
+  const kind = String((e && e.message) || '');
+  let msg;
+  if (!navigator.onLine || code === 'auth/network-request-failed')
     msg = 'Live play needs an internet connection. Check your connection and try again.';
+  else if (kind === 'missing-config')
+    msg = 'This site is missing firebase-config.js. Upload it next to index.html, then reload the page.';
+  else if (kind === 'sdk-failed')
+    msg = 'Couldn’t load the Firebase library from Google. Reload the page, or try another network.';
+  else if (code === 'auth/operation-not-allowed' || code === 'auth/admin-restricted-operation')
+    msg = 'Live play isn’t switched on yet: enable Anonymous sign-in in Firebase (Authentication → Sign-in method).';
   else if (isDenied(e))
     msg = 'The live server refused that request. Try again, or create a new room.';
-  else if (e && e.message === 'no-code')
+  else if (kind === 'no-code')
     msg = 'Couldn’t find a free room code. Try again.';
+  else
+    msg = `Couldn’t reach the live server (${code || kind || 'unknown error'}). Try again in a moment.`;
   showErr(msg);
 }
 
